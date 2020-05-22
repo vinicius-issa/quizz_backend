@@ -1,7 +1,7 @@
 import pytest
 from apps.questions.models import Choice, Question, Response as Answer
 from django.contrib.auth.models import User
-from apps.questions.views import signup, question
+from apps.questions.views import signup, question, answer
 from django.urls import reverse
 
 
@@ -67,12 +67,15 @@ def test_get_questions(rf):
     assert len(response.data['answered']) == 1
 
 
-"""
-def answer(rf):
+@pytest.mark.django_db
+def test_answer(rf):
+    user = User.objects.first()
+    choice = Choice.objects.first()
     path = reverse('answer')
-    request = rf().post(path, {'userId':1, 'choice':1})
-    response = answer(request)
-    unaswered = 
 
-    assert response.status_code == 200
-"""
+    assert Answer.objects.all().count() == 0
+
+    request = rf.post(path, {'user': user.id, 'choice_id': choice.id})
+    response = answer(request)
+    assert response.status_code == 302
+    assert Answer.objects.all().count() == 1

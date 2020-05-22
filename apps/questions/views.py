@@ -3,11 +3,25 @@ from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from apps.questions.models import Response as Answer, Question, Choice
 from .serializers import ChoiceSerializer, QuestionSerializer
+from django.urls import reverse
+from django.http import HttpResponseRedirect
 
 
 # Create your views here.
+@api_view(['POST'])
 def answer(request):
-    return Response({}, 200)
+    user_id = request.data['user']
+    choice_id = request.data['choice_id']
+
+    try:
+        answer = Answer(user_id=user_id, choices_id=choice_id)
+        answer.save()
+
+        return HttpResponseRedirect(
+            redirect_to=reverse('question', kwargs={'user_id': user_id}))
+
+    except Exception:
+        return Response({'error': 'error'}, 400)
 
 
 @api_view(['POST'])
@@ -18,7 +32,6 @@ def signup(request):
         user.save()
         return Response({'user_id': user.id}, 200)
     except Exception:
-        print('error')
         return Response({'error': 'duplicate username'}, 400)
 
 
@@ -47,4 +60,3 @@ def question(request, user_id):
         'unanswered': unanswered
     }
     return Response(data, 200)
-    
