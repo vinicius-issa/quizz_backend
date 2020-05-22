@@ -1,7 +1,7 @@
 import pytest
 from apps.questions.models import Choice, Question, Response as Answer
 from django.contrib.auth.models import User
-from apps.questions.views import signup
+from apps.questions.views import signup, question
 from django.urls import reverse
 
 
@@ -46,11 +46,33 @@ def test_signup(rf):
     response = signup(request)
     assert response.status_code == 400
 
+
+@pytest.mark.django_db
+def test_get_questions(rf):
+
+    user = User.objects.first()
+    path = reverse('question', kwargs={'user_id': user.id})
+
+    request = rf.get(path)
+    response = question(request, user.id)
+    assert response.status_code == 200
+    assert len(response.data['unanswered']) == 2
+    assert len(response.data['answered']) == 0
+
+    choice = Choice.objects.first()
+    answer = Answer(user=user, choices=choice)
+    answer.save()
+    response = question(request, user.id)
+    assert len(response.data['unanswered']) == 1
+    assert len(response.data['answered']) == 1
+
+
 """
 def answer(rf):
     path = reverse('answer')
     request = rf().post(path, {'userId':1, 'choice':1})
     response = answer(request)
+    unaswered = 
 
     assert response.status_code == 200
 """
