@@ -12,7 +12,7 @@ def new_question(django_db_blocker):
     return question
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def new_question_with_incorrect_choices(django_db_blocker):
     titles = ["Choice1", "Choice2", "Choice3", "Choice4"]
     question_title = "How are you?"
