@@ -35,3 +35,9 @@ class Response(models.Model):
         User,
         on_delete=models.CASCADE
     )
+
+    def __str__(self):
+        return 'User: {} choice:{}'.format(self.user.username, self.choices.id)
+
+    class Meta:
+        unique_together = ('choices', 'user')
