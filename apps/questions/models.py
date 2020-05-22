@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 class Choice(models.Model):
@@ -11,6 +12,17 @@ class Choice(models.Model):
     )
     is_correct = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        exist_true = Choice.objects.filter(
+            question=self.question,
+            is_correct=True).exists()
+        if exist_true:
+            correct = Choice.objects.get(
+                question=self.question,
+                is_correct=True)
+            if self.is_correct and self.id != correct.id:
+                raise ValidationError('Already exist a correct choice for this question')
+        super(Choice, self).save(*args, **kwargs)
 
 class Question(models.Model):
 
